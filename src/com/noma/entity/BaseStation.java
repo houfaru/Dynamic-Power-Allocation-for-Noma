@@ -74,7 +74,7 @@ public class BaseStation {
 	
 	public double[] getChannelGain(UserEquipment u) {
 		ComplexNumber[] channelCoefficient = getChannelCoefficient(u);
-		return ShannonUtil.getChainnelGain(channelCoefficient);
+		return ShannonUtil.getChannelGain(channelCoefficient);
 	}
 	
 	public double getPowerSum() {	

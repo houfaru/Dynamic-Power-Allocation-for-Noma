@@ -7,47 +7,57 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import com.noma.algorithm.AbstractFiveGPowerOptimizer;
 import com.noma.algorithm.PowerParameter;
+import com.noma.algorithm.RuntimeParameter;
 import com.noma.entity.BaseStation;
 import com.noma.entity.BaseStationManager;
 import com.noma.entity.UserEquipment;
 import com.noma.experiment.Scenario;
 import com.noma.helper.ShannonUtil;
 
-public class ThreeUserBaseLineOptimizer extends AbstractFiveGPowerOptimizer {
+/**
+ * 
+ * An 'optimizer' which returns uniform power assignment
+ *
+ */
+public class ThreeUserBaseLineOptimizer extends AbstractFiveGPowerOptimizer<RuntimeParameter> {
 
     public ThreeUserBaseLineOptimizer(Scenario c) {
-        super(c, initParameter(c));
+        super(c, initParameter(c), null);
     }
 
-    private static PowerParameter initParameter(Scenario c) {
+    private static PowerParameter initParameter(Scenario scenario) {
         PowerParameter powerParameter = new PowerParameter();
-        ThreeUserScenario scenario = (ThreeUserScenario) c;
-        powerParameter.setPower(scenario.baseStationX, scenario.getUserCenterA(), 1 / 2);
-        powerParameter.setPower(scenario.baseStationX, scenario.getUserEdgeC(), 1 / 2);
-        powerParameter.setPower(scenario.baseStationY, scenario.getUserCenterB(), 1 / 2);
-        powerParameter.setPower(scenario.baseStationY, scenario.getUserEdgeC(), 1 / 2);
+        ThreeUserScenario threeUserScenario = (ThreeUserScenario) scenario;
+        powerParameter.setPower(threeUserScenario.getBaseStationX(),
+                threeUserScenario.getUserCenterA(), 1 / 2);
+        powerParameter.setPower(threeUserScenario.getBaseStationX(),
+                threeUserScenario.getUserEdgeC(), 1 / 2);
+        powerParameter.setPower(threeUserScenario.getBaseStationY(),
+                threeUserScenario.getUserCenterB(), 1 / 2);
+        powerParameter.setPower(threeUserScenario.getBaseStationY(),
+                threeUserScenario.getUserEdgeC(), 1 / 2);
         return powerParameter;
     }
 
     @Override
-    public double objectiveFunction(Scenario c, PowerParameter newPar) {
-        assert (c instanceof ThreeUserScenario);
-        ThreeUserScenario threeUserScenario = (ThreeUserScenario) c;
+    public double objectiveFunction(Scenario scenario, PowerParameter powerParameter) {
+        assert (scenario instanceof ThreeUserScenario);
+        final ThreeUserScenario threeUserScenario = (ThreeUserScenario) scenario;
 
-        BaseStationManager bm = threeUserScenario.getBaseStationManager();
+        final BaseStationManager bm = threeUserScenario.getBaseStationManager();
 
-        UserEquipment centerB = threeUserScenario.getUserCenterB();
-        UserEquipment centerA = threeUserScenario.getUserCenterA();
-        UserEquipment edgeC = threeUserScenario.getUserEdgeC();
+        final UserEquipment centerB = threeUserScenario.getUserCenterB();
+        final UserEquipment centerA = threeUserScenario.getUserCenterA();
+        final UserEquipment edgeC = threeUserScenario.getUserEdgeC();
 
-        BaseStation bsX = threeUserScenario.getBaseStationX();
-        BaseStation bsY = threeUserScenario.getBaseStationY();
+        final BaseStation bsX = threeUserScenario.getBaseStationX();
+        final BaseStation bsY = threeUserScenario.getBaseStationY();
 
-        HashMap<UserEquipment, Double> shannonCapacity =
-                ShannonUtil.getShannonCapacity(bm, bsX, bsY, centerA, centerB, edgeC, newPar);
-        double[] values =
+        final HashMap<UserEquipment, Double> shannonCapacity = ShannonUtil.getShannonCapacity(bm, bsX,
+                bsY, centerA, centerB, edgeC, powerParameter);
+        final double[] values =
                 ArrayUtils.toPrimitive(shannonCapacity.values().stream().toArray(Double[]::new));
-        StandardDeviation sd = new StandardDeviation();
+        final StandardDeviation sd = new StandardDeviation();
         double std = sd.evaluate(values);
         return std;
     }

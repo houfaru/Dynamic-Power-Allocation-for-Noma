@@ -4,26 +4,27 @@ import com.noma.algorithm.AbstractFiveGPowerOptimizer;
 import com.noma.algorithm.PowerParameter;
 import com.noma.experiment.Scenario;
 
-public class HillClimbingOptimizer extends AbstractFiveGPowerOptimizer {
+public class HillClimbingOptimizer
+        extends AbstractFiveGPowerOptimizer<HillClimbingRuntimeParameter> {
 
-    HillClimbingRuntimeParameter parameter = HillClimbingRuntimeParameter.getDefaultParameter();
+    public HillClimbingOptimizer(Scenario scenario, PowerParameter powerParameter,
+            HillClimbingRuntimeParameter runtimeParameter) {
+        super(scenario, powerParameter, runtimeParameter);
+    }
 
-    public HillClimbingOptimizer(Scenario c, PowerParameter par,
-            HillClimbingRuntimeParameter parameter) {
-        super(c, par);
-        this.parameter = parameter;
+    public HillClimbingOptimizer(Scenario scenario, PowerParameter powerParameter) {
+        super(scenario, powerParameter, HillClimbingRuntimeParameter.getDefaultParameter());
     }
 
     @Override
     public PowerParameter execute() {
         double oldCost = 1;
         double newCost = 0;
-        while (Math.abs(oldCost - newCost) > parameter.getZeroThreshold()) {
+        while (Math.abs(oldCost - newCost) > runtimeParameter.getZeroThreshold()) {
 
-            for (int i = 0; i < parameter.getNumOfSteps(); i++) {
+            for (int i = 0; i < runtimeParameter.getNumOfSteps(); i++) {
                 PowerParameter oldParameter = scenario.getParameter();
                 PowerParameter newParameter = randomizeParameter(oldParameter);
-                newParameter.normalizePerBS();
 
                 oldCost = objectiveFunction(scenario, oldParameter);
                 newCost = objectiveFunction(scenario, newParameter);

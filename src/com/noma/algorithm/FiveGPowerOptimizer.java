@@ -10,25 +10,33 @@ import com.noma.experiment.Scenario;
 import com.noma.helper.ShannonUtil;
 
 public interface FiveGPowerOptimizer {
-    
-	public default double objectiveFunction(Scenario scenario, PowerParameter newPar) {
 
-		HashMap<UserEquipment, Double> shannonCapacityPerUE = ShannonUtil.getShannonCapacity(scenario.getBaseStationManager(),
-				newPar);
+    /**
+     * Our optimizer tries to increase fairness. So, we define the objective function to be a
+     * minimization of the standard deviation for the shannon capacities per user
+     * 
+     * @param scenario
+     * @param powerParameter
+     * @return
+     */
+    public default double objectiveFunction(Scenario scenario, PowerParameter powerParameter) {
 
-		double[] allShannonCapacities = ArrayUtils
-				.toPrimitive(shannonCapacityPerUE.values().stream().toArray(Double[]::new));
+        HashMap<UserEquipment, Double> shannonCapacityPerUE =
+                ShannonUtil.getShannonCapacity(scenario.getBaseStationManager(), powerParameter);
 
-		StandardDeviation sdCalculator = new StandardDeviation();
-		double standardDeviation = sdCalculator.evaluate(allShannonCapacities);
+        double[] allShannonCapacities = ArrayUtils
+                .toPrimitive(shannonCapacityPerUE.values().stream().toArray(Double[]::new));
 
-		return standardDeviation;
-	};
+        StandardDeviation sdCalculator = new StandardDeviation();
+        double standardDeviation = sdCalculator.evaluate(allShannonCapacities);
 
-	public PowerParameter randomizeParameter(PowerParameter par);
+        return standardDeviation;
+    };
 
-	public PowerParameter getInitialParameter();
+    public PowerParameter randomizeParameter(PowerParameter parameter);
 
-	public PowerParameter execute();
-	
+    public PowerParameter getInitialParameter();
+
+    public PowerParameter execute();
+
 }

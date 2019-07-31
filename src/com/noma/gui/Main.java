@@ -1,4 +1,4 @@
-package com.noma.experiment;
+package com.noma.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -34,7 +34,7 @@ public class Main extends JFrame {
         this.add(centerPanel, BorderLayout.CENTER);
         westPanel.setLayout(new FlowLayout());
         westPanel.add(new SAPanel(SimulatedAnnealingRuntimeParameter.getDefaultParameter(),
-                new ThreadListener() {
+                new GuiExecutorThreadListener() {
 
                     @Override
                     public void before() {
@@ -52,7 +52,7 @@ public class Main extends JFrame {
                 }));
 
         westPanel.add(new HCPanel(HillClimbingRuntimeParameter.getDefaultParameter(),
-                new ThreadListener() {
+                new GuiExecutorThreadListener() {
 
                     @Override
                     public void before() {

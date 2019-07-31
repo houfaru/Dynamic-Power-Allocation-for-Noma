@@ -1,4 +1,4 @@
-package com.noma.experiment;
+package com.noma.gui;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import com.noma.entity.ShannonCapacityData;
  * executed
  *
  */
-public interface ThreadListener {
+public interface GuiExecutorThreadListener {
     
     public void before();
 

@@ -1,4 +1,4 @@
-package com.noma.experiment;
+package com.noma.gui;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -8,32 +8,32 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.noma.algorithm.simulatedannealing.SimulatedAnnealingRuntimeParameter;
+import com.noma.experiment.Runner;
 
 /**
  * A Panel for SimulatedAnnealing taking the parameters
  *
  */
-public class SAPanel extends JPanel {
+public class SAPanel extends NomaPanel<SimulatedAnnealingRuntimeParameter> {
 
     private static final long serialVersionUID = 1L;
 
-    private static JButton executeButton = new JButton("execute");
+    private JButton executeButton = new JButton("execute");
 
     private JTextField numOfSteps = new JTextField(2);
     private JTextField startingTemperature = new JTextField(1);
     private JTextField frozenTemperature = new JTextField("0.05");
     private JTextField coolingRate = new JTextField("0.7");
 
+    private Thread simulatedAnnealingThread;
 
-    private Thread saThread;
+    public SAPanel(SimulatedAnnealingRuntimeParameter saParameter,
+            GuiExecutorThreadListener listener) {
 
-    public SAPanel(SimulatedAnnealingRuntimeParameter saParameter, ThreadListener listener) {
-
-        saThread = new Thread(Runner.getSATask(listener::after, saParameter));
+        simulatedAnnealingThread = new Thread(Runner.getSATask(listener::after, saParameter));
 
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black),
                 "Simulated Annealing"));
@@ -51,10 +51,10 @@ public class SAPanel extends JPanel {
         executeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                if (!saThread.isAlive()) {
+                if (!simulatedAnnealingThread.isAlive()) {
                     listener.before();
-                    saThread = new Thread(Runner.getSATask(listener::after, saParameter));
-                    saThread.start();
+                    simulatedAnnealingThread = new Thread(Runner.getSATask(listener::after, saParameter));
+                    simulatedAnnealingThread.start();
                 }
 
             }
@@ -62,6 +62,7 @@ public class SAPanel extends JPanel {
         updateView(saParameter);
     }
 
+    @Override
     public void updateView(SimulatedAnnealingRuntimeParameter parameter) {
         numOfSteps.setText(String.valueOf(parameter.getNumOfSteps()));
         startingTemperature.setText(String.valueOf(parameter.getStartingTemperature()));
@@ -69,6 +70,7 @@ public class SAPanel extends JPanel {
         coolingRate.setText(String.valueOf(parameter.getCoolingRate()));
     }
 
+    @Override
     public SimulatedAnnealingRuntimeParameter getParameter() {
         return new SimulatedAnnealingRuntimeParameter(Integer.valueOf(numOfSteps.getText()),
                 Double.valueOf(startingTemperature.getText()),

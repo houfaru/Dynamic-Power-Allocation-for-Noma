@@ -9,19 +9,18 @@ import com.noma.entity.BaseStation;
 import com.noma.entity.UserEquipment;
 import com.noma.experiment.Scenario;
 
-public abstract class AbstractFiveGPowerOptimizer implements FiveGPowerOptimizer{
+public abstract class AbstractFiveGPowerOptimizer<T extends RuntimeParameter> implements FiveGPowerOptimizer{
 	
-	protected Scenario scenario;
-	protected PowerParameter initialParameter;
+	protected final Scenario scenario;
+	protected final PowerParameter initialParameter;
+	protected final T runtimeParameter;
 	
-	public AbstractFiveGPowerOptimizer(Scenario scenario,PowerParameter parameter) {
+	public AbstractFiveGPowerOptimizer(Scenario scenario,PowerParameter parameter, T runtimeParameter) {
 		this.scenario=scenario;
 		this.initialParameter=parameter;
+		this.runtimeParameter=runtimeParameter;
 	}
 	
-	public void setParameter(PowerParameter parameter) {
-		this.initialParameter=parameter;
-	}
 	@Override
 	public PowerParameter getInitialParameter() {
 		return initialParameter;
@@ -37,7 +36,7 @@ public abstract class AbstractFiveGPowerOptimizer implements FiveGPowerOptimizer
 			Entry<BaseStation, UserEquipment> entry= iterator.next();
 			newParameter.addPower(entry.getKey(), entry.getValue(), nextDouble);
 		}
-		
+		newParameter.normalizePerBS();
 		return newParameter;
 	}
 	

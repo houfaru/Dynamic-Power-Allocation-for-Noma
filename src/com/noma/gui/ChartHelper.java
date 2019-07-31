@@ -1,4 +1,4 @@
-package com.noma.experiment;
+package com.noma.gui;
 
 
 import java.awt.BasicStroke;
