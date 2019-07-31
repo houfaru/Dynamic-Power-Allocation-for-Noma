@@ -65,8 +65,7 @@ public class Runner {
 
     }
 
-    public static void runNormal(BiConsumer<Long, List<ShannonCapacityData>> callBack,
-            PowerParameter powerParameter) {
+    public static void runNormal(BiConsumer<Long, List<ShannonCapacityData>> callBack) {
         List<ShannonCapacityData> shannonData = new ArrayList<ShannonCapacityData>();
         long startTime = System.currentTimeMillis();
         for (int i = 5; i <= 30; i += 1) {
