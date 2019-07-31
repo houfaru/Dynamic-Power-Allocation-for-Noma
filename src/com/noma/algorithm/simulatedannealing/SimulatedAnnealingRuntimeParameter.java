@@ -50,4 +50,9 @@ public class SimulatedAnnealingRuntimeParameter implements RuntimeParameter {
         return coolingRate;
     }
 
+    @Override
+    public String toString() {
+        return "[" + numOfSteps + "," + startingTemperature + "," + frozenTemperature + ","
+                + coolingRate + "]";
+    }
 }

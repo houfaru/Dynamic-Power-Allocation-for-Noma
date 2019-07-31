@@ -12,8 +12,9 @@ import javax.swing.JTextField;
 
 import com.noma.algorithm.hillclimbing.HillClimbingRuntimeParameter;
 import com.noma.experiment.Runner;
+import com.noma.experiment.threeuser.HillClimbingOptimizer3UE;
 
-public class HCPanel extends NomaPanel<HillClimbingRuntimeParameter> {
+public class HillClimbingPanel extends NomaAlgorithmPanel<HillClimbingRuntimeParameter> {
 
 
     private static final long serialVersionUID = 1L;
@@ -23,13 +24,14 @@ public class HCPanel extends NomaPanel<HillClimbingRuntimeParameter> {
     private JTextField numOfSteps = new JTextField(2);
     private JTextField zeroThreshold = new JTextField(1);
 
-    private Thread simulatedAnnealingThread;
+    private Thread hillClimbingThread;
 
-    public HCPanel(HillClimbingRuntimeParameter hillClimbingRuntimeParameter,
+    public HillClimbingPanel(HillClimbingRuntimeParameter hillClimbingRuntimeParameter,
             GuiExecutorThreadListener listener) {
 
-        simulatedAnnealingThread =
-                new Thread(Runner.getHCRunnable(listener::after, hillClimbingRuntimeParameter));
+        hillClimbingThread = new Thread(
+                Runner.getOptimizerThreadRunnable(HillClimbingOptimizer3UE.class,
+                        listener::after, hillClimbingRuntimeParameter));
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black),
                 "Hill Climbing"));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -43,11 +45,12 @@ public class HCPanel extends NomaPanel<HillClimbingRuntimeParameter> {
         executeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                if (!simulatedAnnealingThread.isAlive()) {
+                if (!hillClimbingThread.isAlive()) {
                     listener.before();
-                    simulatedAnnealingThread = new Thread(
-                            Runner.getHCRunnable(listener::after, hillClimbingRuntimeParameter));
-                    simulatedAnnealingThread.start();
+                    hillClimbingThread = new Thread(Runner.getOptimizerThreadRunnable(
+                            HillClimbingOptimizer3UE.class, listener::after,
+                            hillClimbingRuntimeParameter));
+                    hillClimbingThread.start();
                 }
 
             }

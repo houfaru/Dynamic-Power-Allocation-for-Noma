@@ -4,7 +4,7 @@ import javax.swing.JPanel;
 
 import com.noma.algorithm.RuntimeParameter;
 
-public abstract class NomaPanel<T extends RuntimeParameter> extends JPanel {
+public abstract class NomaAlgorithmPanel<T extends RuntimeParameter> extends JPanel {
 
     private static final long serialVersionUID = 1L;
 

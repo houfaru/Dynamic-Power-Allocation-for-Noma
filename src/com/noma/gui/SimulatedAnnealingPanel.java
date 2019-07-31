@@ -12,12 +12,13 @@ import javax.swing.JTextField;
 
 import com.noma.algorithm.simulatedannealing.SimulatedAnnealingRuntimeParameter;
 import com.noma.experiment.Runner;
+import com.noma.experiment.threeuser.OfflineSimulatedAnnealingOptimizer3UE;
 
 /**
  * A Panel for SimulatedAnnealing taking the parameters
  *
  */
-public class SAPanel extends NomaPanel<SimulatedAnnealingRuntimeParameter> {
+public class SimulatedAnnealingPanel extends NomaAlgorithmPanel<SimulatedAnnealingRuntimeParameter> {
 
     private static final long serialVersionUID = 1L;
 
@@ -30,10 +31,11 @@ public class SAPanel extends NomaPanel<SimulatedAnnealingRuntimeParameter> {
 
     private Thread simulatedAnnealingThread;
 
-    public SAPanel(SimulatedAnnealingRuntimeParameter saParameter,
+    public SimulatedAnnealingPanel(SimulatedAnnealingRuntimeParameter saParameter,
             GuiExecutorThreadListener listener) {
 
-        simulatedAnnealingThread = new Thread(Runner.getSATask(listener::after, saParameter));
+        simulatedAnnealingThread = new Thread(Runner.getOptimizerThreadRunnable(
+                OfflineSimulatedAnnealingOptimizer3UE.class, listener::after, saParameter));
 
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black),
                 "Simulated Annealing"));
@@ -53,7 +55,9 @@ public class SAPanel extends NomaPanel<SimulatedAnnealingRuntimeParameter> {
             public void actionPerformed(ActionEvent arg0) {
                 if (!simulatedAnnealingThread.isAlive()) {
                     listener.before();
-                    simulatedAnnealingThread = new Thread(Runner.getSATask(listener::after, saParameter));
+                    simulatedAnnealingThread = new Thread(Runner.getOptimizerThreadRunnable(
+                            OfflineSimulatedAnnealingOptimizer3UE.class, listener::after,
+                            saParameter));
                     simulatedAnnealingThread.start();
                 }
 

@@ -31,4 +31,9 @@ public class HillClimbingRuntimeParameter implements RuntimeParameter {
         return zeroThreshold;
     }
 
+    @Override
+    public String toString() {
+        return "[" + numOfSteps + "," + zeroThreshold + "]";
+    }
+
 }

@@ -22,10 +22,12 @@ import com.noma.entity.ShannonCapacityData;
 public class Main extends JFrame {
 
     private static JScrollPane consoleScroller = new JScrollPane();
-    private static JScrollPane centerResultScroller = new JScrollPane();
     private static JTextArea console = new JTextArea(10, 30);
 
+    private static JScrollPane centerPanelScroller = new JScrollPane();
     private static JPanel centerPanel = new JPanel();
+
+
 
     public Main() {
 
@@ -36,8 +38,8 @@ public class Main extends JFrame {
         this.add(initEastControlPanel(), BorderLayout.EAST);
 
         centerPanel = new JPanel(new VerticalLayout());
-        centerResultScroller = new JScrollPane(centerPanel);
-        this.add(centerResultScroller, BorderLayout.CENTER);
+        centerPanelScroller = new JScrollPane(centerPanel);
+        this.add(centerPanelScroller, BorderLayout.CENTER);
         algorithmsPanel.setLayout(new VerticalLayout());
         algorithmsPanel.add(new BaseLinePanel(new GuiExecutorThreadListener() {
 
@@ -54,7 +56,8 @@ public class Main extends JFrame {
                 centerPanel.repaint();
             }
         }));
-        algorithmsPanel.add(new SAPanel(SimulatedAnnealingRuntimeParameter.getDefaultParameter(),
+        algorithmsPanel.add(new SimulatedAnnealingPanel(
+                SimulatedAnnealingRuntimeParameter.getDefaultParameter(),
                 new GuiExecutorThreadListener() {
 
                     @Override
@@ -65,29 +68,38 @@ public class Main extends JFrame {
                     @Override
                     public void after(Long timeElapsed, List<ShannonCapacityData> shannonList) {
                         console.append("simulated annealing finished in " + timeElapsed + " ms\n");
-                        centerPanel.add(
-                                new ChartHelper("Simulated Annealing", shannonList).getChart());
+                        centerPanel.add(new ChartHelper(
+                                "Simulated Annealing " + SimulatedAnnealingRuntimeParameter
+                                        .getDefaultParameter().toString(),
+                                shannonList).getChart());
                         centerPanel.revalidate();
                         centerPanel.repaint();
                     }
                 }));
 
-        algorithmsPanel.add(new HCPanel(HillClimbingRuntimeParameter.getDefaultParameter(),
-                new GuiExecutorThreadListener() {
+        algorithmsPanel
+                .add(new HillClimbingPanel(HillClimbingRuntimeParameter.getDefaultParameter(),
+                        new GuiExecutorThreadListener() {
 
-                    @Override
-                    public void before() {
-                        console.append("Hill Climbing started\n");
-                    }
+                            @Override
+                            public void before() {
+                                console.append("Hill Climbing started\n");
+                            }
 
-                    @Override
-                    public void after(Long timeElapsed, List<ShannonCapacityData> shannonList) {
-                        console.append("Hill Climbing finished in " + timeElapsed + " ms\n");
-                        centerPanel.add(new ChartHelper("Hill Climbing", shannonList).getChart());
-                        centerPanel.revalidate();
-                        centerPanel.repaint();
-                    }
-                }));
+                            @Override
+                            public void after(Long timeElapsed,
+                                    List<ShannonCapacityData> shannonList) {
+                                console.append(
+                                        "Hill Climbing finished in " + timeElapsed + " ms\n");
+                                centerPanel
+                                        .add(new ChartHelper(
+                                                "Hill Climbing " + HillClimbingRuntimeParameter
+                                                        .getDefaultParameter().toString(),
+                                                shannonList).getChart());
+                                centerPanel.revalidate();
+                                centerPanel.repaint();
+                            }
+                        }));
 
 
 
@@ -124,9 +136,9 @@ public class Main extends JFrame {
     private static final long serialVersionUID = 1L;
 
     public static void main(String[] args) {
-        Main m = new Main();
-        m.setVisible(true);
-        m.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        Main main = new Main();
+        main.setVisible(true);
+        main.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
 }

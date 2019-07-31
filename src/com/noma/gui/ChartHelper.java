@@ -98,7 +98,6 @@ public class ChartHelper extends JPanel {
 
         plot.setRangeGridlinesVisible(false);
         plot.setDomainGridlinesVisible(false);
-
         chart.getLegend().setFrame(BlockBorder.NONE);
 
         chart.setTitle(new TextTitle(title,

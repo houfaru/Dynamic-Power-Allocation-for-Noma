@@ -10,20 +10,24 @@ import javax.swing.JButton;
 
 import com.noma.algorithm.RuntimeParameter;
 import com.noma.experiment.Runner;
+import com.noma.experiment.threeuser.ThreeUserBaseLineOptimizer;
 
 /**
- * A Panel for SimulatedAnnealing taking the parameters
+ * A Panel for uniform power allocation
  *
  */
-public class BaseLinePanel extends NomaPanel<RuntimeParameter> {
+public class BaseLinePanel extends NomaAlgorithmPanel<RuntimeParameter> {
 
     private static final long serialVersionUID = 1L;
 
     private JButton executeButton = new JButton("execute");
 
+    Thread normalThread;
 
     public BaseLinePanel(GuiExecutorThreadListener listener) {
-
+        normalThread =
+                new Thread(Runner.getOptimizerThreadRunnable(ThreeUserBaseLineOptimizer.class,
+                        listener::after, null));
 
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black),
                 "BaseLine"));
@@ -33,8 +37,12 @@ public class BaseLinePanel extends NomaPanel<RuntimeParameter> {
         executeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                listener.before();
-                Runner.runNormal(listener::after);
+                if (!normalThread.isAlive()) {
+                    listener.before();
+                    normalThread = new Thread(Runner.getOptimizerThreadRunnable(
+                            ThreeUserBaseLineOptimizer.class, listener::after, null));
+                    normalThread.start();
+                }
             }
         });
     }
@@ -47,11 +55,9 @@ public class BaseLinePanel extends NomaPanel<RuntimeParameter> {
 
     }
 
-
-
     @Override
     public RuntimeParameter getParameter() {
-     // nothing to do
+        // nothing to do
         return null;
     }
 }
