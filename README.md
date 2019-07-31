@@ -12,3 +12,6 @@ The current supported scenario :
 where
 user A and C are connected to Base Station X
 user B and C are connected to Base Station Y
+
+5G System model:
+https://ieeexplore.ieee.org/document/6708131
