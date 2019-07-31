@@ -1,7 +1,7 @@
 # Dynamic-Power-Allocation-for-Noma
 This project is a simulation project for Power Allocation over 5G network.
 
-The current supported algorithm :
+The current supported algorithms :
 - Simulated Annealing
 - Hill Climbing
 
@@ -11,4 +11,4 @@ The current supported scenario :
 
 where
 user A and C are connected to Base Station X
-user B and C are connectoed to Base Station Y
+user B and C are connected to Base Station Y
