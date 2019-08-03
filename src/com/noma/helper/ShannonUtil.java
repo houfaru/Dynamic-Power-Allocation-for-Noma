@@ -16,132 +16,123 @@ import no.uib.cipr.matrix.DenseMatrix;
 
 public class ShannonUtil {
 
-    static double[] result = null;
+	private static double[] result = null;
 
-    /**
-     * This method generates an array of values using gaussian distribution
-     * 
-     * @param mean the mean of the gaussion distribution
-     * @param variance the variance of the gaussian distribution
-     * @param size the size of the array
-     * @return Normally distributed array of values
-     */
-    public static double[] gauss(double mean, double variance, int size) {
-        if (result != null) {
-            return result;
-        }
+	/**
+	 * This method generates an array of values using gaussian distribution
+	 * 
+	 * @param mean     the mean of the gaussion distribution
+	 * @param variance the variance of the gaussian distribution
+	 * @param size     the size of the array
+	 * @return Normally distributed array of values
+	 */
+	public static double[] gauss(double mean, double variance, int size) {
+		if (result != null) {
+			return result;
+		}
 
-        Random random = new Random();
-        result = new double[size];
-        for (int i = 0; i < size; i++) {
-            result[i] = (float) (random.nextGaussian() * Math.sqrt(variance) + mean);
-        }
-        return result;
-    }
+		Random random = new Random();
+		result = new double[size];
+		for (int i = 0; i < size; i++) {
+			result[i] = (float) (random.nextGaussian() * Math.sqrt(variance) + mean);
+		}
+		return result;
+	}
 
+	/**
+	 * A very specific implementation of shannon capacity for two base stations and
+	 * three users
+	 * 
+	 * @param bm      BaseStationManager which contains distances etc
+	 * @param bsX     base station X
+	 * @param bsY     base station Y
+	 * @param centerA center user connected to bsX
+	 * @param centerB center user connected to bsY
+	 * @param edgeC   edge user connected to both bsX and bsY
+	 * @param par     contains power allocations for all users
+	 * @return capacity for each user
+	 */
+	public static HashMap<UserEquipment, Double> getShannonCapacity(BaseStationManager bm, BaseStation bsX,
+			BaseStation bsY, UserEquipment centerA, UserEquipment centerB, UserEquipment edgeC, PowerParameter par) {
 
+		HashMap<UserEquipment, Double> result = new HashMap<>();
 
-    /**
-     * A vey specific implementation of shannon capacity for two base stations and three users
-     * 
-     * @param bm BaseStationManager which contains distances etc
-     * @param bsX base station X
-     * @param bsY base station Y
-     * @param centerA center user connected to bsX
-     * @param centerB center user connected to bsY
-     * @param edgeC edge user connected to both bsX and bsY
-     * @param par contains power allocations for all users
-     * @return capacity for each user
-     */
-    public static HashMap<UserEquipment, Double> getShannonCapacity(BaseStationManager bm,
-            BaseStation bsX, BaseStation bsY, UserEquipment centerA, UserEquipment centerB,
-            UserEquipment edgeC, PowerParameter par) {
+		double txSNR = bm.gettxSNR();
 
-        HashMap<UserEquipment, Double> result = new HashMap<>();
+		double powerXA = par.getPower(bsX, centerA);
+		double powerXC = 1 - powerXA;
 
-        double txSNR = bm.gettxSNR();
+		double powerYB = par.getPower(bsY, centerB);
+		double powerYC = 1 - powerYB;
 
-        double powerXA = par.getPower(bsX, centerA);
-        double powerXC = 1 - powerXA;
+		double[] gainXA = bsX.getChannelGain(centerA);
+		double[] gainXB = bsX.getChannelGain(centerB);
+		double[] gainXC = bsX.getChannelGain(edgeC);
 
-        double powerYB = par.getPower(bsY, centerB);
-        double powerYC = 1 - powerYB;
+		double[] gainYA = bsY.getChannelGain(centerA);
+		double[] gainYB = bsY.getChannelGain(centerB);
+		double[] gainYC = bsY.getChannelGain(edgeC);
 
-        double[] gainXA = bsX.getChannelGain(centerA);
-        double[] gainXB = bsX.getChannelGain(centerB);
-        double[] gainXC = bsX.getChannelGain(edgeC);
+		double[] signalA = MatrixUtils.scalarMultiplicationAndAddition(txSNR * powerXA, gainXA, 0);
+		double[] noiseA = MatrixUtils.scalarMultiplicationAndAddition(txSNR * powerYB, gainXB, 1);
+		double capaA = centerA.getBandwidth()
+				* log2(1 + centerA.getBandwidth() * MatrixUtils.sumPairwiseMultiply(signalA, pinv(noiseA)));
 
-        double[] gainYA = bsY.getChannelGain(centerA);
-        double[] gainYB = bsY.getChannelGain(centerB);
-        double[] gainYC = bsY.getChannelGain(edgeC);
+		double[] signalB = MatrixUtils.scalarMultiplicationAndAddition(txSNR * powerYB, gainYB, 0);
+		double[] noiseB = MatrixUtils.scalarMultiplicationAndAddition(txSNR * powerXA, gainYA, 1);
+		double capaB = centerB.getBandwidth()
+				* log2(1 + centerB.getBandwidth() * MatrixUtils.sumPairwiseMultiply(signalB, pinv(noiseB)));
 
-        double[] signalA = MatrixUtils.scalarMultiplyAndAdd(txSNR * powerXA, gainXA, 0);
-        double[] noiseA = MatrixUtils.scalarMultiplyAndAdd(txSNR * powerYB, gainXB, 1);
-        double capaA = centerA.getBandwidth() * log2(1
-                + centerA.getBandwidth() * MatrixUtils.sumPairwiseMultiply(signalA, pinv(noiseA)));
+		double[] signalC = MatrixUtils.pairwiseAddition(
+				MatrixUtils.scalarMultiplicationAndAddition(txSNR * powerXC, gainXC, 0),
+				MatrixUtils.scalarMultiplicationAndAddition(txSNR * powerYC, gainYC, 0));
 
+		double[] noiseC = MatrixUtils.pairwiseAddition(
+				MatrixUtils.scalarMultiplicationAndAddition(txSNR * powerXA, gainXC, 0),
+				MatrixUtils.scalarMultiplicationAndAddition(txSNR * powerYB, gainYC, 1));
 
-        double[] signalB = MatrixUtils.scalarMultiplyAndAdd(txSNR * powerYB, gainYB, 0);
-        double[] noiseB = MatrixUtils.scalarMultiplyAndAdd(txSNR * powerXA, gainYA, 1);
-        double capaB = centerB.getBandwidth() * log2(1
-                + centerB.getBandwidth() * MatrixUtils.sumPairwiseMultiply(signalB, pinv(noiseB)));
+		double capaC = edgeC.getBandwidth()
+				* log2(1 + edgeC.getBandwidth() * MatrixUtils.sumPairwiseMultiply(signalC, pinv(noiseC)));
 
-        double[] signalC = MatrixUtils.pairwiseAddition(
-                MatrixUtils.scalarMultiplyAndAdd(txSNR * powerXC, gainXC, 0),
-                MatrixUtils.scalarMultiplyAndAdd(txSNR * powerYC, gainYC, 0));
+		result.put(centerA, capaA);
+		result.put(centerB, capaB);
+		result.put(edgeC, capaC);
+		return result;
+	}
 
-        double[] noiseC = MatrixUtils.pairwiseAddition(
-                MatrixUtils.scalarMultiplyAndAdd(txSNR * powerXA, gainXC, 0),
-                MatrixUtils.scalarMultiplyAndAdd(txSNR * powerYB, gainYC, 1));
+	public static double log2(double d) {
+		return Math.log(d) / Math.log(2.0);
+	}
 
-        double capaC = edgeC.getBandwidth() * log2(
-                1 + edgeC.getBandwidth() * MatrixUtils.sumPairwiseMultiply(signalC, pinv(noiseC)));
+	public static HashMap<UserEquipment, Double> getShannonCapacity(BaseStationManager bm, PowerParameter parameter) {
+		throw new UnsupportedOperationException("As of now, general shannon capacity formula is unsupported");
+	};
 
+	/**
+	 * inverse a vector
+	 * 
+	 * @param values
+	 * @return
+	 */
+	private static double[] pinv(double[] values) {
+		int numRows = 1;
+		int numColumns = values.length;
+		boolean deep = true;
+		DenseMatrix denseMatrix = new DenseMatrix(numRows, numColumns, values, deep);
+		DenseMatrix pseudoInverse = MatrixUtils.pseudoInverse(denseMatrix);
+		return pseudoInverse.getData();
+	}
 
-        result.put(centerA, capaA);
-        result.put(centerB, capaB);
-        result.put(edgeC, capaC);
-        return result;
-    }
+	public static ComplexNumber[] getChannelCoefficient(double mean, double variance, int size) {
+		ComplexNumber[] coeff = new ComplexNumber[size];
+		double[] gaussReal = ShannonUtil.gauss(mean, variance, size);
+		double[] gaussIm = ShannonUtil.gauss(mean, variance, size);
+		IntStream.range(0, size).forEach(i -> coeff[i] = new ComplexNumber(gaussReal[i], gaussIm[i]));
+		return coeff;
+	}
 
-    public static double log2(double d) {
-        return Math.log(d) / Math.log(2.0);
-    }
-
-    public static HashMap<UserEquipment, Double> getShannonCapacity(BaseStationManager bm,
-            PowerParameter parameter) {
-        throw new UnsupportedOperationException(
-                "As of now, general shannon capacity formula is unsupported");
-    };
-
-    /**
-     * inverse a vector
-     * 
-     * @param values
-     * @return
-     */
-    private static double[] pinv(double[] values) {
-        int numRows = 1;
-        int numColumns = values.length;
-        boolean deep = true;
-        DenseMatrix denseMatrix = new DenseMatrix(numRows, numColumns, values, deep);
-        DenseMatrix pseudoInverse = MatrixUtils.pseudoInverse(denseMatrix);
-        return pseudoInverse.getData();
-    }
-
-
-
-    public static ComplexNumber[] getChannelCoefficient(double mean, double variance, int size) {
-        ComplexNumber[] coeff = new ComplexNumber[size];
-        double[] gaussReal = ShannonUtil.gauss(mean, variance, size);
-        double[] gaussIm = ShannonUtil.gauss(mean, variance, size);
-        IntStream.range(0, size)
-                .forEach(i -> coeff[i] = new ComplexNumber(gaussReal[i], gaussIm[i]));
-        return coeff;
-    }
-
-    public static double[] getChannelGain(ComplexNumber[] coeff) {
-        Double[] cg = Arrays.stream(coeff).map(c -> c.absSquared()).toArray(Double[]::new);
-        return ArrayUtils.toPrimitive(cg);
-    }
+	public static double[] getChannelGain(ComplexNumber[] coeff) {
+		Double[] cg = Arrays.stream(coeff).map(c -> c.absSquared()).toArray(Double[]::new);
+		return ArrayUtils.toPrimitive(cg);
+	}
 }

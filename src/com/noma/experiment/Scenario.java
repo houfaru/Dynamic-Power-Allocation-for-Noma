@@ -8,7 +8,9 @@ import com.noma.entity.BaseStationManager;
 import com.noma.entity.UserEquipment;
 
 public interface Scenario {
+	
 	public BaseStationManager getBaseStationManager();
+	
 	public default PowerParameter getParameter() {
 		PowerParameter powerParameter=new PowerParameter();
 		BaseStationManager baseStationManager = getBaseStationManager();
@@ -21,6 +23,7 @@ public interface Scenario {
 		}
 		return powerParameter;
 	};
+	
 	public default void applyParameter(PowerParameter powerParameter){
 		powerParameter.normalizePerBS();
 		for (SimpleEntry<BaseStation, UserEquipment> simpleEntry : powerParameter) {
@@ -29,4 +32,5 @@ public interface Scenario {
 			baseStation.assignPower(userEquipment, powerParameter.getPower(baseStation, userEquipment));
 		}
 	}
+	
 }
