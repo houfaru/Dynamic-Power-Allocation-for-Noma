@@ -12,36 +12,39 @@ import com.noma.experiment.threeuser.ThreeUserBaseLineOptimizer;
  * A Panel for uniform power allocation
  *
  */
-public class BaseLinePanel
-        extends NomaAlgorithmPanel<RuntimeParameter, ThreeUserBaseLineOptimizer> {
+public class BaseLinePanel extends NomaAlgorithmPanel<RuntimeParameter> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public BaseLinePanel(GuiExecutorThreadListener listener) {
-        super(ThreeUserBaseLineOptimizer.class, listener, null);
-        setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black),
-                "BaseLine"));
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+	Thread normalThread;
 
+	public BaseLinePanel(GuiExecutorThreadListener listener) {
+		super(null, listener);
+		setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "BaseLine"));
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-    }
+	}
 
-    @Override
-    public void initInputElements() {
-        // do nothing
-    }
+	@Override
+	public void updateView(RuntimeParameter runtimeParameter) {
+		// nothing to do
 
-    @Override
-    public void updateView(RuntimeParameter runtimeParameter) {
-        // do nothing
-    }
+	}
 
-    @Override
-    public RuntimeParameter getParameter() {
-        // do nothing
-        return null;
-    }
+	@Override
+	public RuntimeParameter getParameter() {
+		// nothing to do
+		return null;
+	}
 
+	@Override
+	protected Class<?> getOptimizerClass() {
+		return ThreeUserBaseLineOptimizer.class;
+	}
 
+	@Override
+	public void initComponents() {
+		// nothing to do
 
+	}
 }

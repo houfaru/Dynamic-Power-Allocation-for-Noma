@@ -6,39 +6,37 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import com.noma.algorithm.AbstractFiveGPowerOptimizer;
 import com.noma.algorithm.RuntimeParameter;
-import com.noma.experiment.Runner;
+import com.noma.experiment.ExperimentThreadRunnerFactory;
 
-public abstract class NomaAlgorithmPanel<T extends RuntimeParameter, R extends AbstractFiveGPowerOptimizer<T>>
-        extends JPanel {
+public abstract class NomaAlgorithmPanel<T extends RuntimeParameter> extends JPanel {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
+	private Thread thread;
+	private JButton executeButton = new JButton("execute");
 
-    protected JButton executeButton = new JButton("execute");
+	public NomaAlgorithmPanel(T parameter, GuiExecutorThreadListener listener) {
+		initComponents();
+		this.add(executeButton);
+		updateView(parameter);
+		executeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				listener.before();
+				thread = new Thread(ExperimentThreadRunnerFactory.getOptimizerThreadRunnable(getOptimizerClass(),
+						listener::after, parameter));
+				thread.start();
+			}
+		});
+		updateView(parameter);
+	}
 
-    public NomaAlgorithmPanel(Class<?> clazz, GuiExecutorThreadListener listener, T parameter) {
-        initInputElements();
-        updateView(parameter);
-        this.add(executeButton);
-        executeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
+	protected abstract Class<?> getOptimizerClass();
 
-                listener.before();
-                Thread normalThread =
-                        new Thread(Runner.getOptimizerThreadRunnable(clazz, listener::after, parameter));
-                normalThread.start();
+	public abstract void updateView(T runtimeParameter);
 
-            }
-        });
+	public abstract T getParameter();
 
-    }
-
-    public abstract void updateView(T runtimeParameter);
-
-    public abstract T getParameter();
-
-    public abstract void initInputElements();
+	public abstract void initComponents();
 
 }

@@ -51,6 +51,9 @@ public class BaseStation {
 		allocatedPowerMap.put(user, power);
 	}
 	
+	public boolean isUserConnected(UserEquipment ue) {
+		return users.contains(ue);
+	}
 	
 	public double getPower(UserEquipment u) {
 		return allocatedPowerMap.get(u);
@@ -79,6 +82,13 @@ public class BaseStation {
 	
 	public double getPowerSum() {	
 		return allocatedPowerMap.values().stream().reduce((a,b)->a+b).orElse((double) 0);
+	}
+	public void normalize() {
+		double powerSum = getPowerSum();
+		for (UserEquipment userEquipment : allocatedPowerMap.keySet()) {
+			Double power = allocatedPowerMap.get(userEquipment);
+			allocatedPowerMap.put(userEquipment, power/powerSum);
+		}
 	}
 	
 }
